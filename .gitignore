@@ -1,0 +1,25 @@
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+
+# Frontend build output
+frontend/dist/
+build/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+backend/.venv/
+.DS_Store
