@@ -1,3 +1,5 @@
+import SensorList from "../features/sensors/SensorList"
+
 const sections = [
   { id: "sensors", title: "Sensors" },
   { id: "config", title: "Config" },
@@ -10,7 +12,9 @@ const sections = [
 export default function DashboardPage() {
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-bold">Dashboard</h2>
+      <h2 className="mb-6 text-2xl font-bold">
+        Dashboard
+      </h2>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {sections.map((section) => (
@@ -19,10 +23,17 @@ export default function DashboardPage() {
             id={section.id}
             className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
           >
-            <h3 className="font-semibold">{section.title}</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              Placeholder for future phase.
-            </p>
+            <h3 className="mb-3 font-semibold">
+              {section.title}
+            </h3>
+
+            {section.id === "sensors" ? (
+              <SensorList />
+            ) : (
+              <p className="text-sm text-slate-500">
+                Placeholder for future phase.
+              </p>
+            )}
           </section>
         ))}
       </div>
