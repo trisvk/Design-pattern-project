@@ -1,13 +1,18 @@
 import SensorList from "../features/sensors/SensorList"
+import DeviceList from "../components/devices/DeviceList"
+import LocationConfigWizard from "../components/config/LocationConfigWizard"
+
 
 const sections = [
   { id: "sensors", title: "Sensors" },
-  { id: "config", title: "Config" },
+  { id: "devices", title: "Devices" },
+  { id: "configuration", title: "Configuration" },
   { id: "automation", title: "Automation" },
   { id: "overview", title: "Overview" },
   { id: "controls", title: "Controls" },
   { id: "events", title: "Events" },
 ]
+
 
 export default function DashboardPage() {
   return (
@@ -29,6 +34,10 @@ export default function DashboardPage() {
 
             {section.id === "sensors" ? (
               <SensorList />
+            ) : section.id === "devices" ? (
+              <DeviceList />
+            ) : section.id === "configuration" ? (
+              <LocationConfigWizard />
             ) : (
               <p className="text-sm text-slate-500">
                 Placeholder for future phase.

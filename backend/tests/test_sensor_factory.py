@@ -1,3 +1,4 @@
+#AI created
 from domain.sensor_factory import (
     LightSensorCreator,
     MoistureSensorCreator,

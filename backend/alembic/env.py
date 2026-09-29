@@ -14,7 +14,7 @@ sys.path.insert(0, str(SRC_DIR))
 
 
 from infrastructure.settings import settings
-from infrastructure.models import Base
+from infrastructure.persistence.models import Base
 
 
 # Alembic Config object

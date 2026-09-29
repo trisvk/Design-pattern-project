@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from application.sensor_service import SensorService
 from infrastructure.db import get_db
-from infrastructure.device_repository import DeviceRepository
+from infrastructure.persistence.device_repository import DeviceRepository
 
 
 router = APIRouter(

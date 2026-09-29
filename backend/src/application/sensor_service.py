@@ -1,6 +1,6 @@
 from domain.sensor import Sensor
 from domain.sensor_factory import get_creator
-from infrastructure.device_repository import DeviceRepository
+from infrastructure.persistence.device_repository import DeviceRepository
 
 
 class SensorService:
