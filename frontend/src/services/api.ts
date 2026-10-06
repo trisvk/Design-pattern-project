@@ -411,3 +411,96 @@ export async function fetchZoneDevices(
 
   return response.json()
 }
+
+// =========================
+// Sensor readings / sampling
+// =========================
+
+export interface ReadingDto {
+  device_id: string
+  value: number
+  unit: string
+  source: "simulation" | "mqtt" | "vendor"
+  recorded_at: string
+}
+
+
+export interface SamplingSettings {
+  sampling_interval_seconds: number
+  tracking_enabled: boolean
+}
+
+
+// POST /api/sensors/{id}/read
+export async function readSensorNow(
+  deviceId: string,
+): Promise<ReadingDto> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/sensors/${deviceId}/read`,
+    {
+      method: "POST",
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getApiError(
+        response,
+        "Failed to read sensor",
+      ),
+    )
+  }
+
+  return response.json()
+}
+
+
+// GET /api/sensors/{id}/readings?limit=1
+export async function fetchSensorReadings(
+  deviceId: string,
+  limit = 1,
+): Promise<ReadingDto[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/sensors/${deviceId}/readings?limit=${limit}`,
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getApiError(
+        response,
+        "Failed to load sensor readings",
+      ),
+    )
+  }
+
+  return response.json()
+}
+
+
+// PATCH /api/devices/{id}/sampling
+export async function updateSampling(
+  deviceId: string,
+  settings: SamplingSettings,
+): Promise<SamplingSettings> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/devices/${deviceId}/sampling`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings),
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getApiError(
+        response,
+        "Failed to update sampling",
+      ),
+    )
+  }
+
+  return response.json()
+}

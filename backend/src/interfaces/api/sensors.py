@@ -1,12 +1,15 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from application.readings.dto import ReadingDto
+from application.readings.service import ReadingIngest
 from application.sensor_service import SensorService
 from infrastructure.db import get_db
 from infrastructure.persistence.device_repository import DeviceRepository
+from infrastructure.persistence.reading_repository import ReadingRepository
 
 
 router = APIRouter(
@@ -76,3 +79,57 @@ def create_sensor(
         display_name=sensor.display_name,
         default_config=sensor.default_config,
     )
+
+def get_reading_ingest(
+    db: Session = Depends(get_db),
+) -> ReadingIngest:
+    return ReadingIngest(DeviceRepository(db), ReadingRepository(db))
+
+
+@router.post(
+    "/{device_id}/read",
+    response_model=ReadingDto,
+)
+def take_reading(
+    device_id: UUID,
+    ingest: ReadingIngest = Depends(get_reading_ingest),
+) -> ReadingDto:
+    try:
+        return ingest.take_reading(device_id)
+
+    except LookupError:
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found",
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+@router.get(
+    "/{device_id}/readings",
+    response_model=list[ReadingDto],
+)
+def list_readings(
+    device_id: UUID,
+    limit: int = Query(
+        default=20,
+        ge=1,
+        le=100,
+    ),
+    ingest: ReadingIngest = Depends(get_reading_ingest),
+) -> list[ReadingDto]:
+    try:
+        return ingest.list_readings(
+            device_id,
+            limit,
+        )
+
+    except LookupError:
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found",
+        )

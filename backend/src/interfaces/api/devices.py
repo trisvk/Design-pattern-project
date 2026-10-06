@@ -1,6 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
 
 from application.devices.dto import DeviceDto
 from application.devices.dto import AssignZoneRequestDto
@@ -16,6 +17,16 @@ router = APIRouter(
     prefix="/api/devices",
     tags=["devices"],
 )
+
+
+class SamplingRequest(BaseModel):
+    sampling_interval_seconds: int
+    tracking_enabled: bool
+
+
+class SamplingResponse(BaseModel):
+    sampling_interval_seconds: int
+    tracking_enabled: bool
 
 
 @router.get("", response_model=list[DeviceDto])
@@ -77,3 +88,40 @@ def assign_device_zone(
         )
 
     return None
+
+@router.patch(
+    "/{device_id}/sampling",
+    response_model=SamplingResponse,
+)
+def update_sampling(
+    device_id: UUID,
+    body: SamplingRequest,
+    db: Session = Depends(get_db),
+) -> SamplingResponse:
+    if body.sampling_interval_seconds < 5:
+        raise HTTPException(
+            status_code=400,
+            detail="Sampling interval must be at least 5 seconds",
+        )
+
+    repo = DeviceRepository(db)
+
+    device = repo.update_sampling(
+        device_id,
+        body.sampling_interval_seconds,
+        body.tracking_enabled,
+    )
+
+    if device is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found",
+        )
+
+    return SamplingResponse(
+        sampling_interval_seconds=(
+            device.sampling_interval_seconds
+        ),
+        tracking_enabled=device.tracking_enabled,
+    )
+

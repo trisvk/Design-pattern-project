@@ -1,7 +1,17 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Index, Numeric, String, text
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    desc,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -47,7 +57,10 @@ class ZoneRow(Base):
 
     location_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("locations.id", ondelete="CASCADE"),
+        ForeignKey(
+            "locations.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     )
 
@@ -77,7 +90,10 @@ class ZoneRow(Base):
     )
 
     __table_args__ = (
-        Index("ix_zones_location_id", "location_id"),
+        Index(
+            "ix_zones_location_id",
+            "location_id",
+        ),
     )
 
 
@@ -120,14 +136,32 @@ class DeviceRow(Base):
 
     location_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("locations.id", ondelete="SET NULL"),
+        ForeignKey(
+            "locations.id",
+            ondelete="SET NULL",
+        ),
         nullable=True,
     )
 
     zone_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("zones.id", ondelete="SET NULL"),
+        ForeignKey(
+            "zones.id",
+            ondelete="SET NULL",
+        ),
         nullable=True,
+    )
+
+    sampling_interval_seconds: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default=text("300"),
+    )
+
+    tracking_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default=text("true"),
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -140,4 +174,52 @@ class DeviceRow(Base):
         Index("ix_devices_role", "role"),
         Index("ix_devices_family", "device_family"),
         Index("ix_devices_zone_id", "zone_id"),
+    )
+
+
+class ReadingRow(Base):
+    __tablename__ = "sensor_readings"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    )
+
+    device_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "devices.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+    )
+
+    value: Mapped[float] = mapped_column(
+        Numeric,
+        nullable=False,
+    )
+
+    unit: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+
+    source: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=text("now()"),
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_sensor_readings_device_recorded_at",
+            "device_id",
+            desc("recorded_at"),
+        ),
     )

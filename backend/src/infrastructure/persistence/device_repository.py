@@ -140,3 +140,32 @@ class DeviceRepository:
             self._row_to_device(row)
             for row in rows
         ]
+
+    def list_tracked_sensors_rows(self) -> list[DeviceRow]:
+        statement = select(DeviceRow).where(
+            DeviceRow.role == "sensor",
+            DeviceRow.tracking_enabled.is_(True),
+        )
+
+        return list(self._db.scalars(statement).all())
+
+    def update_sampling(
+        self,
+        device_id: UUID,
+        sampling_interval_seconds: int,
+        tracking_enabled: bool,
+    ) -> DeviceRow | None:
+        device = self.get_device_row(device_id)
+
+        if device is None:
+            return None
+
+        device.sampling_interval_seconds = (
+            sampling_interval_seconds
+        )
+        device.tracking_enabled = tracking_enabled
+
+        self._db.commit()
+        self._db.refresh(device)
+
+        return device
