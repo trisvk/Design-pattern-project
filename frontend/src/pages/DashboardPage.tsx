@@ -1,7 +1,8 @@
+
 import SensorList from "../features/sensors/SensorList"
 import DeviceList from "../components/devices/DeviceList"
 import LocationConfigWizard from "../components/config/LocationConfigWizard"
-
+import StrategyPanel from "../components/automation/StrategyPanel"
 
 const sections = [
   { id: "sensors", title: "Sensors" },
@@ -12,7 +13,6 @@ const sections = [
   { id: "controls", title: "Controls" },
   { id: "events", title: "Events" },
 ]
-
 
 export default function DashboardPage() {
   return (
@@ -38,6 +38,8 @@ export default function DashboardPage() {
               <DeviceList />
             ) : section.id === "configuration" ? (
               <LocationConfigWizard />
+            ) : section.id === "automation" ? (
+              <StrategyPanel />
             ) : (
               <p className="text-sm text-slate-500">
                 Placeholder for future phase.

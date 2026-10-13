@@ -504,3 +504,79 @@ export async function updateSampling(
 
   return response.json()
 }
+
+
+// =========================
+// Automation strategies
+// =========================
+
+export type StrategyKey =
+  | "conservative"
+  | "aggressive"
+
+export interface AutomationStrategyResponse {
+  location_id: string
+  strategy_key: StrategyKey
+}
+
+export interface RecommendationDto {
+  location_id: string
+  strategy_key: StrategyKey
+  action: string
+  reason: string
+}
+
+
+// PUT /api/locations/{location_id}/automation
+export async function saveAutomationStrategy(
+  locationId: string,
+  strategyKey: StrategyKey,
+): Promise<AutomationStrategyResponse> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/locations/${locationId}/automation`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        strategy_key: strategyKey,
+      }),
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getApiError(
+        response,
+        "Failed to save automation strategy",
+      ),
+    )
+  }
+
+  return response.json()
+}
+
+
+// POST /api/locations/{location_id}/automation/evaluate
+export async function evaluateAutomation(
+  locationId: string,
+): Promise<RecommendationDto> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/locations/${locationId}/automation/evaluate`,
+    {
+      method: "POST",
+    },
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getApiError(
+        response,
+        "Failed to evaluate automation strategy",
+      ),
+    )
+  }
+
+  return response.json()
+}
