@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from infrastructure.persistence.models import (
@@ -104,3 +104,72 @@ class AutomationRepository:
             return None
 
         return float(value)
+
+
+    
+    def get_location_with_zones(
+        self,
+        location_id: UUID,
+    ):
+        location = self._db.get(LocationRow, location_id)
+
+        if location is None:
+            return None
+
+        zones = self.list_zones(location_id)
+        return location, zones
+
+    def get_assigned_devices(
+        self,
+        location_id: UUID,
+    ) -> list[DeviceRow]:
+        statement = (
+            select(DeviceRow)
+            .join(ZoneRow, DeviceRow.zone_id == ZoneRow.id)
+            .where(
+                DeviceRow.location_id == location_id,
+                DeviceRow.zone_id.is_not(None),
+                ZoneRow.location_id == location_id,
+            )
+            .order_by(DeviceRow.id)
+        )
+
+        return list(self._db.scalars(statement).all())
+
+    def get_latest_readings_for_devices(
+        self,
+        device_ids: list[UUID],
+    ) -> dict[UUID, ReadingRow]:
+        if not device_ids:
+            return {}
+
+        ranked = (
+            select(
+                ReadingRow.id.label("reading_id"),
+                func.row_number().over(
+                    partition_by=ReadingRow.device_id,
+                    order_by=(
+                        ReadingRow.recorded_at.desc(),
+                        ReadingRow.id.desc(),
+                    ),
+                ).label("position"),
+            )
+            .where(ReadingRow.device_id.in_(device_ids))
+            .subquery()
+        )
+
+        statement = (
+            select(ReadingRow)
+            .join(
+                ranked,
+                ReadingRow.id == ranked.c.reading_id,
+            )
+            .where(ranked.c.position == 1)
+        )
+
+        readings = self._db.scalars(statement).all()
+
+        return {
+            reading.device_id: reading
+            for reading in readings
+        }
