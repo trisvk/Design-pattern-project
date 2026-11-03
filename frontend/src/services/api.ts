@@ -97,7 +97,10 @@ export interface DeviceDto {
   device_family: DeviceFamily
   display_name: string | null
   default_config: Record<string, unknown>
+  state: string | null
+  allowed_commands: string[]
 }
+
 
 type DeviceFilters = {
   family?: DeviceFamily
