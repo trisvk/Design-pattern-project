@@ -1,4 +1,6 @@
+import datetime
 from uuid import UUID
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -70,3 +72,7 @@ class ActuatorStateRepository:
             row.state = state
 
         self._db.commit()
+
+    def get_state_with_timestamp(self, device_id: UUID) -> tuple[str, datetime] | None:
+        row = self._db.get(ActuatorStateRow, device_id)
+        return None if row is None else (row.state, row.updated_at)

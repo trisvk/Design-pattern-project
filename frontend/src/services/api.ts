@@ -641,3 +641,43 @@ export async function fetchLocationOverview(
 
   return response.json()
 }
+
+// =========================
+// Actuator executions (Phase 9)
+// =========================
+
+export interface ExecutionDto {
+  id: string
+  device_id: string
+  success: boolean
+  policy_applied: string[]
+  message: string | null
+  created_at: string
+}
+
+export async function fetchExecutions(limit = 20): Promise<ExecutionDto[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/actuators/executions?limit=${limit}`,
+  )
+  if (!response.ok) {
+    throw new Error(await getApiError(response, "Failed to fetch executions"))
+  }
+  return response.json()
+}
+
+export async function applyActuatorDemo(
+  deviceId: string,
+  command: string,
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/actuators/${deviceId}/apply`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command, payload: {} }),
+    },
+  )
+  if (!response.ok) {
+    throw new Error(await getApiError(response, "Apply failed"))
+  }
+}

@@ -5,6 +5,7 @@ import DeviceList from "../components/devices/DeviceList"
 import LocationConfigWizard from "../components/config/LocationConfigWizard"
 import StrategyPanel from "../components/automation/StrategyPanel"
 import OverviewPanel from "../components/overview/OverviewPanel"
+import ExecutionLog from "../components/devices/ExecutionLog" 
 
 const sections = [
   { id: "sensors", title: "Sensors" },
@@ -38,6 +39,9 @@ export default function DashboardPage() {
 
       case "overview":
         return <OverviewPanel />
+
+      case "controls":
+        return <ExecutionLog />
 
       default:
         return (
