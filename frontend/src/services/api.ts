@@ -681,3 +681,45 @@ export async function applyActuatorDemo(
     throw new Error(await getApiError(response, "Apply failed"))
   }
 }
+
+// =========================
+// Commands (Phase 10)
+// =========================
+
+export type CommandStatus = "success" | "failed" | "rejected"
+
+export interface CommandLogDto {
+  id: string
+  command_type: string
+  device_id: string
+  payload: Record<string, unknown>
+  status: CommandStatus
+  error_message: string | null
+  created_at: string
+}
+
+export async function submitCommand(
+  deviceId: string,
+  commandType: string,
+  payload: Record<string, unknown> = {},
+): Promise<CommandLogDto> {
+  const response = await fetch(`${API_BASE_URL}/api/commands`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ command_type: commandType, device_id: deviceId, payload }),
+  })
+
+  // 409 (rejected) still returns a log row
+  if (response.ok || response.status === 409) {
+    return response.json()
+  }
+  throw new Error(await getApiError(response, "Command failed"))
+}
+
+export async function fetchCommandHistory(limit = 50): Promise<CommandLogDto[]> {
+  const response = await fetch(`${API_BASE_URL}/api/commands?limit=${limit}`)
+  if (!response.ok) {
+    throw new Error(await getApiError(response, "Failed to fetch command history"))
+  }
+  return response.json()
+}

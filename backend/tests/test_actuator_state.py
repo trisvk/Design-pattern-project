@@ -31,8 +31,8 @@ def test_illegal_transition_does_not_change_state():
 def test_allowed_commands_change_with_state():
     actuator = ActuatorContext("idle")
 
-    assert actuator.allowed_commands() == ["start_pump"]
+    assert actuator.allowed_commands() == ["start_pump", "set_light_level"]
 
     actuator.transition("running")
 
-    assert actuator.allowed_commands() == ["stop_pump"]
+    assert actuator.allowed_commands() == ["stop_pump", "set_light_level"]

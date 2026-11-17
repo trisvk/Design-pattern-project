@@ -6,6 +6,7 @@ import LocationConfigWizard from "../components/config/LocationConfigWizard"
 import StrategyPanel from "../components/automation/StrategyPanel"
 import OverviewPanel from "../components/overview/OverviewPanel"
 import ExecutionLog from "../components/devices/ExecutionLog" 
+import CommandPanel from "../components/commands/CommandPanel"
 
 const sections = [
   { id: "sensors", title: "Sensors" },
@@ -41,7 +42,12 @@ export default function DashboardPage() {
         return <OverviewPanel />
 
       case "controls":
-        return <ExecutionLog />
+        return (
+          <div className="space-y-10">
+            <CommandPanel />
+            <ExecutionLog />
+          </div>
+        )
 
       default:
         return (

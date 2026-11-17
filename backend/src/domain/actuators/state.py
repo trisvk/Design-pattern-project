@@ -14,6 +14,13 @@ COMMANDS: dict[str, list[str]] = {
     "maintenance": ["finish_maintenance"],
 }
 
+COMMANDS: dict[str, list[str]] = {
+    "idle": ["start_pump", "set_light_level"],
+    "running": ["stop_pump", "set_light_level"],
+    "off": ["turn_on"],
+    "error": ["reset"],
+    "maintenance": ["finish_maintenance"],
+}
 
 class IllegalTransitionError(ValueError):
     pass
