@@ -6,11 +6,13 @@ from sqlalchemy.orm import Session
 from application.commands.dto import CommandLogDto, CommandRequestDto
 from application.commands.service import CommandService
 from application.devices.family_service import ActuatorNotFoundError
+from application.alerts.subscribers import build_event_bus
 from domain.commands.invoker import UnknownCommandError
 from infrastructure.db import get_db
 from infrastructure.persistence.actuator_state_repository import ActuatorStateRepository
 from infrastructure.persistence.command_log_repository import CommandLogRepository
 from infrastructure.persistence.execution_log_repository import ExecutionLogRepository
+from infrastructure.persistence.device_repository import DeviceRepository
 
 
 router = APIRouter(prefix="/api/commands", tags=["commands"])
@@ -21,6 +23,8 @@ def get_command_service(db: Session = Depends(get_db)) -> CommandService:
         ActuatorStateRepository(db),
         CommandLogRepository(db),
         ExecutionLogRepository(db),
+        device_repo=DeviceRepository(db),
+        event_bus=build_event_bus(db),
     )
 
 

@@ -7,6 +7,7 @@ import StrategyPanel from "../components/automation/StrategyPanel"
 import OverviewPanel from "../components/overview/OverviewPanel"
 import ExecutionLog from "../components/devices/ExecutionLog" 
 import CommandPanel from "../components/commands/CommandPanel"
+import EventFeed from "../components/events/EventFeed"
 
 const sections = [
   { id: "sensors", title: "Sensors" },
@@ -48,6 +49,8 @@ export default function DashboardPage() {
             <ExecutionLog />
           </div>
         )
+      case "events":
+        return <EventFeed />
 
       default:
         return (

@@ -12,6 +12,8 @@ from infrastructure.persistence.device_repository import (
 from infrastructure.persistence.reading_repository import (
     ReadingRepository,
 )
+from domain.events.bus import EventBus
+from domain.events.events import ReadingCreated
 
 
 class ReadingIngest:
@@ -19,9 +21,11 @@ class ReadingIngest:
         self,
         device_repo: DeviceRepository,
         reading_repo: ReadingRepository,
+        event_bus: EventBus | None = None,
     ):
         self._device_repo = device_repo
         self._reading_repo = reading_repo
+        self._event_bus = event_bus
 
     def take_reading(
         self,
@@ -78,6 +82,20 @@ class ReadingIngest:
             )
 
         saved = self._reading_repo.insert(reading)
+
+        # Publish only for tracked devices (row is stored either way)
+        if self._event_bus is not None and device_row.tracking_enabled:
+            self._event_bus.publish(
+                ReadingCreated(
+                    device_id=saved.device_id,
+                    value=float(saved.value),
+                    unit=saved.unit,
+                    source=saved.source,
+                    recorded_at=saved.recorded_at,
+                    location_id=device_row.location_id,   
+                    zone_id=device_row.zone_id,           
+                )
+            )
 
         return self._to_dto(saved)
 

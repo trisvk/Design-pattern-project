@@ -723,3 +723,41 @@ export async function fetchCommandHistory(limit = 50): Promise<CommandLogDto[]> 
   }
   return response.json()
 }
+
+// =========================
+// Alerts (Phase 11)
+// =========================
+
+export interface AlertDto {
+  id: string
+  location_id: string | null
+  zone_id: string | null
+  device_id: string | null
+  severity: "info" | "warning" | "critical"
+  message: string
+  event_type: string
+  status: "active" | "resolved"
+  created_at: string
+  acknowledged_at: string | null
+}
+
+type AlertFilters = {
+  status?: "active" | "resolved"
+  locationId?: string
+  zoneId?: string
+  limit?: number
+}
+
+export async function fetchAlerts(filters: AlertFilters = {}): Promise<AlertDto[]> {
+  const params = new URLSearchParams()
+  if (filters.status) params.set("status", filters.status)
+  if (filters.locationId) params.set("location_id", filters.locationId)
+  if (filters.zoneId) params.set("zone_id", filters.zoneId)
+  params.set("limit", String(filters.limit ?? 50))
+
+  const response = await fetch(`${API_BASE_URL}/api/alerts?${params}`)
+  if (!response.ok) {
+    throw new Error(await getApiError(response, "Failed to fetch alerts"))
+  }
+  return response.json()
+}
